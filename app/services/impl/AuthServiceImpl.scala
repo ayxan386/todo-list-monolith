@@ -1,7 +1,6 @@
 package services.impl
 
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.impl.DefaultJwtBuilder
+import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
 import services.AuthService
 
 import java.time.Instant
@@ -17,11 +16,13 @@ class AuthServiceImpl extends AuthService {
 
   override def login(nickname: String, password: String): Future[String]
   = Future.successful(
-    new DefaultJwtBuilder()
-      .setExpiration(getExpiration())
+    Jwts
+      .builder()
       .setSubject(nickname)
-      .signWith(SignatureAlgorithm.ES256, secret.getBytes)
-      .compact())
+      .setExpiration(getExpiration())
+      .signWith(SignatureAlgorithm.HS256, secret)
+      .compact()
+  )
 
   def getExpiration() = new Date(Instant.now().plus(3, ChronoUnit.HOURS).getNano)
 

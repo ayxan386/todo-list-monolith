@@ -22,4 +22,6 @@ class AuthController @Inject()(cc: ControllerComponents, authService: AuthServic
     }
   }
 
+  def register = ???
+
 }
