@@ -1,29 +1,31 @@
 package services.impl
 
-import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
+import errors.dto.NotFoundError
+import models.User
+import org.mindrot.jbcrypt.BCrypt
+import repository.UserRepository
 import services.AuthService
+import util.JwtUtils
 
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.Date
-import javax.inject.Singleton
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuthServiceImpl extends AuthService {
+class AuthServiceImpl @Inject()(
+    jwtUtils: JwtUtils,
+    userRepository: UserRepository)(implicit ex: ExecutionContext)
+    extends AuthService {
 
-  val secret = "hello_world"
+  override def login(nickname: String, password: String): Future[String] = {
+    userRepository
+      .findByNickname(nickname)
+      .map(o =>
+        o.getOrElse(throw NotFoundError(s"User with $nickname not found")))
+      .filter(checkPasswordEquality(_, password))
+      .recover { case _ => throw PasswordsMatchingError()}
+    Future.successful(jwtUtils.buildToken(nickname))
+  }
 
-  override def login(nickname: String, password: String): Future[String]
-  = Future.successful(
-    Jwts
-      .builder()
-      .setSubject(nickname)
-      .setExpiration(getExpiration())
-      .signWith(SignatureAlgorithm.HS256, secret)
-      .compact()
-  )
-
-  def getExpiration() = new Date(Instant.now().plus(3, ChronoUnit.HOURS).getNano)
-
+  private def checkPasswordEquality(user: User, password: String): Boolean =
+    BCrypt.checkpw(password, user.password)
 }
