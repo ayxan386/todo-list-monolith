@@ -1,6 +1,7 @@
 package services.impl
 
-import errors.dto.NotFoundError
+import errors.dto.badrequest.PasswordsMatchingError
+import errors.dto.notfound.NotFoundError
 import models.User
 import org.mindrot.jbcrypt.BCrypt
 import repository.UserRepository
