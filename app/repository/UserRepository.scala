@@ -19,4 +19,9 @@ class UserRepository @Inject()(implicit ex: ExecutionContext) {
     ctx.run(q).map(ru => ru.headOption)
   }
 
+  def insertUser(user: User): Future[User] = {
+    val q = quote(baseModel.insert(lift(user)).returningGenerated(_.id))
+    ctx.run(q).map(id => user.copy(id = id))
+  }
+
 }
