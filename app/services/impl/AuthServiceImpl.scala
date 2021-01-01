@@ -1,6 +1,6 @@
 package services.impl
 
-import errors.dto.badrequest.PasswordsMatchingError
+import errors.dto.badrequest.{PasswordsMatchingError, UserAlreadyExists}
 import errors.dto.notfound.NotFoundError
 import models.User
 import org.mindrot.jbcrypt.BCrypt
@@ -36,6 +36,9 @@ class AuthServiceImpl @Inject()(
     userRepository
       .findByNickname(nickname)
       .filter(op => op.isEmpty)
+      .recover {
+        case _ => throw UserAlreadyExists()
+      }
       .map(_ => buildNewUser(nickname, password))
       .map(userRepository.insertUser)
       .flatMap(f => f)
