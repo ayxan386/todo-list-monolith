@@ -12,10 +12,10 @@ class UserRepository @Inject()(implicit ex: ExecutionContext) {
 
   import ctx._
 
-  val baseModel: EntityQuery[User] = ctx.querySchema[User]("users")
+  val baseModel = quote { querySchema[User]("users") }
 
   def findByNickname(nickname: String): Future[Option[User]] = {
-    val q = quote(baseModel.filter(_.nickname == nickname))
+    val q = quote(baseModel.filter(_.nickname == lift(nickname)))
     ctx.run(q).map(ru => ru.headOption)
   }
 
