@@ -9,6 +9,8 @@ import repository.UserRepository
 import services.AuthService
 import util.JwtUtils
 
+import java.time.LocalDateTime
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,7 +31,28 @@ class AuthServiceImpl @Inject()(
       .map(user => jwtUtils.buildToken(user.nickname))
   }
 
+  override def register(nickname: String, password: String): Future[String] = {
+    log.info(s"Trying to register new user $nickname")
+    userRepository
+      .findByNickname(nickname)
+      .filter(op => op.isEmpty)
+      .map(_ => buildNewUser(nickname, password))
+      .map(userRepository.insertUser)
+      .flatMap(f => f)
+      .map(user => jwtUtils.buildToken(user.nickname))
+  }
+
+  def buildNewUser(nickname: String, password: String): User =
+    User(
+      id = UUID.randomUUID(),
+      nickname = nickname,
+      password = BCrypt.hashpw(password, BCrypt.gensalt(12)),
+      creationDate = Some(LocalDateTime.now()),
+      lastLoginDate = Some(LocalDateTime.now())
+    )
+
   private def checkPasswordEquality(user: User, password: String): Boolean =
     if (BCrypt.checkpw(password, user.password)) true
     else throw PasswordsMatchingError()
+
 }
