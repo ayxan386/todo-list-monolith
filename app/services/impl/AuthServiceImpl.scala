@@ -27,9 +27,9 @@ class AuthServiceImpl @Inject()(
       .map(_.getOrElse(throw NotFoundError(s"User with $nickname not found")))
       .filter(checkPasswordEquality(_, password))
       .map(user => jwtUtils.buildToken(user.nickname))
-      .recover { case _ => throw PasswordsMatchingError() }
   }
 
   private def checkPasswordEquality(user: User, password: String): Boolean =
-    BCrypt.checkpw(password, user.password)
+    if (BCrypt.checkpw(password, user.password)) true
+    else throw PasswordsMatchingError()
 }
