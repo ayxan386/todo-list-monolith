@@ -20,8 +20,8 @@ class UserRepository @Inject()(implicit ex: ExecutionContext) {
   }
 
   def insertUser(user: User): Future[User] = {
-    val q = quote(baseModel.insert(lift(user)).returningGenerated(_.id))
-    ctx.run(q).map(id => user.copy(id = id))
+    val q = quote(baseModel.insert(lift(user)))
+    ctx.run(q).map(_ => user)
   }
 
 }
