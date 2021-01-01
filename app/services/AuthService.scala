@@ -10,4 +10,6 @@ trait AuthService {
 
   def login(nickname: String, password: String): Future[String]
 
+  def register(nickname: String, password: String): Future[String]
+
 }

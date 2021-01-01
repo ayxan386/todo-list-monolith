@@ -1,29 +1,61 @@
 package services.impl
 
-import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
+import errors.dto.badrequest.{PasswordsMatchingError, UserAlreadyExists}
+import errors.dto.notfound.NotFoundError
+import models.User
+import org.mindrot.jbcrypt.BCrypt
+import org.slf4j.LoggerFactory
+import repository.UserRepository
 import services.AuthService
+import util.JwtUtils
 
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.Date
-import javax.inject.Singleton
-import scala.concurrent.Future
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuthServiceImpl extends AuthService {
+class AuthServiceImpl @Inject()(
+    jwtUtils: JwtUtils,
+    userRepository: UserRepository)(implicit ex: ExecutionContext)
+    extends AuthService {
 
-  val secret = "hello_world"
+  val log = LoggerFactory.getLogger(classOf[AuthServiceImpl])
 
-  override def login(nickname: String, password: String): Future[String]
-  = Future.successful(
-    Jwts
-      .builder()
-      .setSubject(nickname)
-      .setExpiration(getExpiration())
-      .signWith(SignatureAlgorithm.HS256, secret)
-      .compact()
-  )
+  override def login(nickname: String, password: String): Future[String] = {
+    log.info(s"Logging user with nickname $nickname")
+    userRepository
+      .findByNickname(nickname)
+      .map(_.getOrElse(throw NotFoundError(s"User with $nickname not found")))
+      .filter(checkPasswordEquality(_, password))
+      .map(user => jwtUtils.buildToken(user.nickname))
+  }
 
-  def getExpiration() = new Date(Instant.now().plus(3, ChronoUnit.HOURS).getNano)
+  override def register(nickname: String, password: String): Future[String] = {
+    log.info(s"Trying to register new user $nickname")
+    userRepository
+      .findByNickname(nickname)
+      .filter(op => op.isEmpty)
+      .recover {
+        case _ => throw UserAlreadyExists()
+      }
+      .map(_ => buildNewUser(nickname, password))
+      .map(userRepository.insertUser)
+      .flatMap(f => f)
+      .map(user => jwtUtils.buildToken(user.nickname))
+  }
+
+  def buildNewUser(nickname: String, password: String): User =
+    User(
+      id = UUID.randomUUID(),
+      nickname = nickname,
+      password = BCrypt.hashpw(password, BCrypt.gensalt(12)),
+      creationDate = Some(LocalDateTime.now()),
+      lastLoginDate = Some(LocalDateTime.now())
+    )
+
+  private def checkPasswordEquality(user: User, password: String): Boolean =
+    if (BCrypt.checkpw(password, user.password)) true
+    else throw PasswordsMatchingError()
 
 }
