@@ -5,7 +5,7 @@ import io.jsonwebtoken.{JwtException, Jwts, SignatureAlgorithm}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Date
+import java.util.{Base64, Date}
 import javax.inject.Singleton
 
 @Singleton
@@ -18,24 +18,28 @@ class JwtUtils {
       .builder()
       .setSubject(nickname)
       .setExpiration(getExpiration)
-      .signWith(SignatureAlgorithm.HS256, secret.getBytes())
+      .signWith(SignatureAlgorithm.HS256, secret)
       .compact()
 
   def getClaims(token: String) =
     try {
+      println(secret)
       Jwts
         .parser()
-        .setSigningKey(secret.getBytes())
+        .setSigningKey(secret)
         .parseClaimsJws(token)
     } catch {
-      case ex: JwtException => throw InvalidTokenSignatureError()
+      case ex: JwtException => throw InvalidTokenSignatureError(ex)
     }
 
-  def isValid(token: String) =
-    getClaims(token).getBody.getExpiration
-      .before(new Date())
+  def isValid(token: String) = {
+    println(token)
+    val exp = getClaims(token).getBody.getExpiration
+    println(exp)
+    exp.after(new Date())
+  }
 
-  def getExpiration = new Date(Instant.now().plus(3, ChronoUnit.HOURS).getNano)
+  def getExpiration = Date.from(Instant.now().plus(3, ChronoUnit.HOURS))
 
   def getNickname(token: String) = getClaims(token).getBody.getSubject
 }

@@ -8,6 +8,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UserRepository @Inject()(implicit ex: ExecutionContext) {
+
   lazy val ctx = new PostgresAsyncContext[SnakeCase](SnakeCase, "ctx")
 
   import ctx._
@@ -24,4 +25,8 @@ class UserRepository @Inject()(implicit ex: ExecutionContext) {
     ctx.run(q).map(_ => user)
   }
 
+  def deleteByNickname(nickname: String): Future[String] = {
+    val q = quote(baseModel.filter(_.nickname == lift(nickname)).delete)
+    ctx.run(q).map(_ => "success")
+  }
 }

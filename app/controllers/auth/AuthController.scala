@@ -1,10 +1,12 @@
 package controllers.auth
 
+import controllers.GenericResponse
 import controllers.auth.dto.{LoginRequestDTO, TokenResponseDTO}
 import errors.dto.badrequest.BodyParsingException
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.AuthService
+import util.TypedKeys
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -38,6 +40,14 @@ class AuthController @Inject()(
           .map(token => Ok(Json.toJson(TokenResponseDTO(token))))
       case None => throw BodyParsingException()
     }
+  }
+
+  def deleteUser = Action.async { implicit request =>
+    request.attrs
+      .get(TypedKeys.tokenType)
+      .map(authService.deleteUser)
+      .getOrElse(throw new IllegalStateException("something went wrong"))
+      .map(message => Ok(Json.toJson(GenericResponse(message))))
   }
 
 }
