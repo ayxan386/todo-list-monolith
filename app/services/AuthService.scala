@@ -7,6 +7,7 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[AuthServiceImpl])
 trait AuthService {
+  def deleteUser(nickname: String): Future[String]
 
   def login(nickname: String, password: String): Future[String]
 

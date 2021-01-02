@@ -58,4 +58,8 @@ class AuthServiceImpl @Inject()(
     if (BCrypt.checkpw(password, user.password)) true
     else throw PasswordsMatchingError()
 
+  override def deleteUser(nickname: String): Future[String] = {
+    log.info(s"Trying to delete user $nickname")
+    userRepository.deleteByNickname(nickname)
+  }
 }
