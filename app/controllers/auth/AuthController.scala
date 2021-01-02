@@ -7,7 +7,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import services.AuthService
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class AuthController @Inject()(

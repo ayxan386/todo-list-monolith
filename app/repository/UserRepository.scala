@@ -1,6 +1,6 @@
 package repository
 
-import io.getquill.{EntityQuery, PostgresAsyncContext, SnakeCase}
+import io.getquill.{PostgresAsyncContext, SnakeCase}
 import models.User
 
 import javax.inject.{Inject, Singleton}
