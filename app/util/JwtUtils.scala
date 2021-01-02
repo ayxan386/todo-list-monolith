@@ -1,5 +1,6 @@
 package util
 
+import errors.dto.unauthorizthed.InvalidTokenSignatureError
 import io.jsonwebtoken.{JwtException, Jwts, SignatureAlgorithm}
 
 import java.time.Instant

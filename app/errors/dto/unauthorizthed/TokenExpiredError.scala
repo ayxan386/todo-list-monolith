@@ -1,4 +1,4 @@
-package filters
+package errors.dto.unauthorizthed
 
 import errors.dto.AbstractHttpError
 

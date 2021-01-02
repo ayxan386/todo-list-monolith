@@ -1,6 +1,7 @@
 package filters
 
 import akka.stream.Materializer
+import errors.dto.unauthorizthed.{MissingHeadersError, TokenExpiredError}
 import play.api.mvc.{Filter, RequestHeader, Result}
 import util.{JwtUtils, TypedKeys}
 
