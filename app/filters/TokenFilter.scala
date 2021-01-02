@@ -2,6 +2,8 @@ package filters
 
 import akka.stream.Materializer
 import errors.dto.unauthorizthed.{MissingHeadersError, TokenExpiredError}
+import org.slf4j.LoggerFactory
+import play.api.Logger
 import play.api.mvc.{Filter, RequestHeader, Result}
 import util.{JwtUtils, TypedKeys}
 
@@ -16,6 +18,7 @@ class TokenFilter @Inject()(jwtUtils: JwtUtils)(implicit val mat: Materializer,
   private val ignoredPaths = List("login", "register")
   val HEADER_NAME = "Authorization"
   val PREFIX = "Bearer "
+  val log = Logger("filters")
 
   def checkPath(rh: RequestHeader): Option[RequestHeader] =
     Some(rh)
@@ -23,17 +26,18 @@ class TokenFilter @Inject()(jwtUtils: JwtUtils)(implicit val mat: Materializer,
 
   override def apply(f: RequestHeader => Future[Result])(
       rh: RequestHeader): Future[Result] = {
-    if (checkPath(rh).isDefined)
-      Some(rh)
-        .map(rh => rh.headers.get(HEADER_NAME))
-        .getOrElse(throw MissingHeadersError())
-        .map(header => header.substring(0, PREFIX.length))
+    if (checkPath(rh).isDefined) {
+      log.info(rh.headers.toString())
+      rh.headers
+        .get(HEADER_NAME)
+        .orElse(throw MissingHeadersError())
+        .map(header => header.substring(PREFIX.length))
         .filter(jwtUtils.isValid)
         .orElse(throw TokenExpiredError())
         .map(jwtUtils.getNickname)
         .map(nickname => rh.addAttr(TypedKeys.tokenType, nickname))
         .map(f)
         .get
-    else f(rh)
+    } else f(rh)
   }
 }
