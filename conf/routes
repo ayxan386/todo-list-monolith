@@ -1,1 +1,2 @@
 ->     /auth                         routers.AuthRouter
+->     /item-list											routers.ListRouter

@@ -1,4 +1,4 @@
-package routers
+package controllers.lists
 
 import controllers.GenericResponse
 import play.api.libs.json.Json

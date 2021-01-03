@@ -1,14 +1,18 @@
 package controllers
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsObject, JsString, Json, Writes}
 
 case class GenericResponse[T](message: String, data: T) {}
 
 object GenericResponse {
 
-  implicit def writes[T](implicit writes: Writes[T]) =
+  implicit def writes[T](implicit fmt: Writes[T]): Writes[GenericResponse[T]] =
     new Writes[GenericResponse[T]] {
-      override def writes(data: GenericResponse[T]): JsValue =
-        Json.obj("message" -> data.message, "data" -> Json.toJson[T](data.data))
+      def writes(ts: GenericResponse[T]) =
+        JsObject(
+          Seq(
+            "data" -> Json.toJson(ts.data),
+            "message" -> JsString(ts.message)
+          ))
     }
 }

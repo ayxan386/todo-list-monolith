@@ -1,9 +1,9 @@
-package controllers.lists
+package routers
 
+import controllers.lists.ListController
 import play.api.routing.Router.Routes
 import play.api.routing.SimpleRouter
 import play.api.routing.sird._
-import routers.ListController
 
 import javax.inject.{Inject, Singleton}
 

@@ -8,9 +8,9 @@ import java.util.UUID
 case class ItemList(
     id: UUID,
     name: String,
-    userName: String,
+    username: String,
     createDate: Option[LocalDateTime],
-    updateTime: Option[LocalDateTime]
+    updateDate: Option[LocalDateTime]
 )
 
 object ItemList {

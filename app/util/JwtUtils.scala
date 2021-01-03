@@ -5,7 +5,7 @@ import io.jsonwebtoken.{JwtException, Jwts, SignatureAlgorithm}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.{Base64, Date}
+import java.util.Date
 import javax.inject.Singleton
 
 @Singleton
