@@ -47,7 +47,7 @@ class AuthController @Inject()(
       .get(TypedKeys.tokenType)
       .map(authService.deleteUser)
       .getOrElse(throw new IllegalStateException("something went wrong"))
-      .map(message => Ok(Json.toJson(GenericResponse(message))))
+      .map(message => Ok(Json.toJson(GenericResponse(message, data = "success"))))
   }
 
 }
