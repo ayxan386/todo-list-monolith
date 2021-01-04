@@ -10,7 +10,8 @@ case class ItemList(
     name: String,
     username: String,
     createDate: Option[LocalDateTime],
-    updateDate: Option[LocalDateTime]
+    updateDate: Option[LocalDateTime],
+    items: List[Item] = List.empty
 )
 
 object ItemList {
