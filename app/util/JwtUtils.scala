@@ -23,7 +23,6 @@ class JwtUtils {
 
   def getClaims(token: String) =
     try {
-      println(secret)
       Jwts
         .parser()
         .setSigningKey(secret)
@@ -33,9 +32,7 @@ class JwtUtils {
     }
 
   def isValid(token: String) = {
-    println(token)
     val exp = getClaims(token).getBody.getExpiration
-    println(exp)
     exp.after(new Date())
   }
 

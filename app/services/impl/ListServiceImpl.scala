@@ -1,6 +1,7 @@
 package services.impl
 
-import models.ItemList
+import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO}
+import models.{Item, ItemList}
 import play.api.Logger
 import repository.ListRepository
 import services.ListService
@@ -21,8 +22,30 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
                           nickname: String): Future[ItemList] = {
     log.info(s"Creating list $listName by user $nickname")
     val newItemList = createEmptyList(listName, nickname)
-    listRepository.insert(newItemList)
+    listRepository.insertItemList(newItemList)
   }
+
+  override def getListsByNickname(
+      nickname: String): Future[List[ItemListResponseDTO]] = {
+    log.info(s"Getting lists of user $nickname")
+    listRepository.getItemListsByNickname(nickname)
+  }
+
+  override def addItem(req: ItemRequestDTO): Future[Item] = {
+    log.info(s"Added item to list ${req.itemListId}")
+    val item = convertRequestToModel(req)
+    listRepository.insertItem(item)
+  }
+
+  private def convertRequestToModel(req: ItemRequestDTO): Item =
+    Item(
+      id = UUID.randomUUID(),
+      title = req.title,
+      content = req.content,
+      itemListId = req.itemListId,
+      createDate = Some(LocalDateTime.now()),
+      updateDate = Some(LocalDateTime.now())
+    )
 
   private def createEmptyList(listName: String, nickname: String) =
     ItemList(id = UUID.randomUUID(),
@@ -30,4 +53,5 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
              username = nickname,
              createDate = Some(LocalDateTime.now()),
              updateDate = Some(LocalDateTime.now()))
+
 }

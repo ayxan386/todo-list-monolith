@@ -26,7 +26,6 @@ class TokenFilter @Inject()(jwtUtils: JwtUtils)(implicit val mat: Materializer,
   override def apply(f: RequestHeader => Future[Result])(
       rh: RequestHeader): Future[Result] = {
     if (checkPath(rh).isDefined) {
-      log.info(rh.headers.toString())
       rh.headers
         .get(HEADER_NAME)
         .orElse(throw MissingHeadersError())
