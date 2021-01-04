@@ -2,7 +2,7 @@ package controllers.lists
 
 import controllers.GenericResponse
 import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{AbstractController, ControllerComponents, Handler}
 import services.ListService
 import util.TypedKeys
 
@@ -22,5 +22,15 @@ class ListController @Inject()(
       .get
       .map(il => GenericResponse("success", il))
       .map(gr => Ok(Json.toJson(gr)))
+  }
+
+  def getMyLists: Handler = Action.async { implicit request =>
+    request.attrs
+      .get(TypedKeys.tokenType)
+      .map(nickname => listService.getListsByNickname(nickname))
+      .get
+      .map(li => GenericResponse("success", li))
+      .map(Json.toJson(_))
+      .map(Ok(_))
   }
 }

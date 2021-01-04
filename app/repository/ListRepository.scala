@@ -8,6 +8,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ListRepository @Inject()(implicit ex: ExecutionContext) {
+
   lazy val ctx = new PostgresAsyncContext[SnakeCase](SnakeCase, "ctx")
 
   import ctx._
@@ -21,5 +22,12 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
       baseListModel.insert(lift(list))
     }
     ctx.run(q).map(_ => list)
+  }
+
+  def getItemListsByNickname(nickname: String): Future[List[ItemList]] = {
+    val q = quote {
+      baseListModel.filter(_.username == lift(nickname))
+    }
+    ctx.run(q)
   }
 }

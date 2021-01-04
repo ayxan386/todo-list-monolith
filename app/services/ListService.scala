@@ -9,6 +9,8 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[ListServiceImpl])
 trait ListService {
 
+  def getListsByNickname(nickname: String): Future[List[ItemList]]
+
   def createList(listName: String, nickname: String): Future[ItemList]
 
 }

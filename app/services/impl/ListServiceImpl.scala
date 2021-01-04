@@ -30,4 +30,9 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
              username = nickname,
              createDate = Some(LocalDateTime.now()),
              updateDate = Some(LocalDateTime.now()))
+
+  override def getListsByNickname(nickname: String): Future[List[ItemList]] = {
+    log.info(s"Getting lists of user $nickname")
+    listRepository.getItemListsByNickname(nickname)
+  }
 }
