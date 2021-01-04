@@ -13,5 +13,6 @@ class ListRouter @Inject()(listController: ListController)
   override def routes: Routes = {
     case POST(p"/$list_name") => listController.createList(list_name)
     case GET(p"/mine")        => listController.getMyLists
+    case PUT(p"/addItem") => listController.addItem
   }
 }

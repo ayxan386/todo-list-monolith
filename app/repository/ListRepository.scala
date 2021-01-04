@@ -1,7 +1,8 @@
 package repository
 
+import dtos.itemlist.ItemListResponseDTO
 import io.getquill.{PostgresAsyncContext, SnakeCase}
-import models.ItemList
+import models.{Item, ItemList}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,17 +18,53 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
     querySchema[ItemList]("item_list")
   }
 
-  def insert(list: ItemList): Future[ItemList] = {
+  val baseItemModel = quote {
+    querySchema[Item]("items")
+  }
+
+  val listJoinedItems = quote {
+    baseListModel.leftJoin(baseItemModel).on((l, i) => l.id == i.itemListId)
+  }
+
+  def insertItemList(list: ItemList): Future[ItemList] = {
     val q = quote {
       baseListModel.insert(lift(list))
     }
     ctx.run(q).map(_ => list)
   }
 
-  def getItemListsByNickname(nickname: String): Future[List[ItemList]] = {
+  def insertItem(item: Item): Future[Item] = {
     val q = quote {
-      baseListModel.filter(_.username == lift(nickname))
+      baseItemModel.insert(lift(item))
     }
-    ctx.run(q)
+    ctx.run(q).map(_ => item)
+  }
+
+  def toReponseDTO(tup: (ItemList, List[Item])): ItemListResponseDTO = {
+    val (itemList, items) = tup
+    ItemListResponseDTO(
+      id = itemList.id,
+      name = itemList.name,
+      username = itemList.username,
+      createDate = itemList.createDate,
+      updateDate = itemList.updateDate,
+      items = items
+    )
+  }
+
+  def getItemListsByNickname(
+      nickname: String): Future[List[ItemListResponseDTO]] = {
+    val q = quote {
+      listJoinedItems.filter(_._1.username == lift(nickname))
+    }
+    ctx
+      .run(q)
+      .map(
+        list =>
+          list
+            .filter(tup => tup._2.isDefined)
+            .groupMap(_._1)(_._2.get)
+            .map(tup => toReponseDTO(tup))
+            .toList)
   }
 }

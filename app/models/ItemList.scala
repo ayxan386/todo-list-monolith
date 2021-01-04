@@ -10,9 +10,10 @@ case class ItemList(
     name: String,
     username: String,
     createDate: Option[LocalDateTime],
-    updateDate: Option[LocalDateTime],
-    items: List[Item] = List.empty
-)
+    updateDate: Option[LocalDateTime]
+) {
+  override def hashCode(): Int = id.hashCode()
+}
 
 object ItemList {
   implicit val writes = Json.writes[ItemList]

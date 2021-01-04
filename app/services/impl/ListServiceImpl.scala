@@ -1,5 +1,6 @@
 package services.impl
 
+import dtos.itemlist.ItemListResponseDTO
 import models.ItemList
 import play.api.Logger
 import repository.ListRepository
@@ -21,7 +22,7 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
                           nickname: String): Future[ItemList] = {
     log.info(s"Creating list $listName by user $nickname")
     val newItemList = createEmptyList(listName, nickname)
-    listRepository.insert(newItemList)
+    listRepository.insertItemList(newItemList)
   }
 
   private def createEmptyList(listName: String, nickname: String) =
@@ -31,7 +32,8 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
              createDate = Some(LocalDateTime.now()),
              updateDate = Some(LocalDateTime.now()))
 
-  override def getListsByNickname(nickname: String): Future[List[ItemList]] = {
+  override def getListsByNickname(
+      nickname: String): Future[List[ItemListResponseDTO]] = {
     log.info(s"Getting lists of user $nickname")
     listRepository.getItemListsByNickname(nickname)
   }
