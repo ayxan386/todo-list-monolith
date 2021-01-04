@@ -39,9 +39,14 @@ class ListController @Inject()(
   def addItem: Handler = Action.async { implicit request =>
     request.body.asJson match {
       case Some(json) =>
-        json.asOpt[ItemRequestDTO]
+        json
+          .asOpt[ItemRequestDTO]
           .map(req => listService.addItem(req))
-      case None       => throw BodyParsingException()
+          .get
+          .map(item => GenericResponse("success", item))
+          .map(Json.toJson(_))
+          .map(Ok(_))
+      case None => throw BodyParsingException()
     }
   }
 }

@@ -25,6 +25,28 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
     listRepository.insertItemList(newItemList)
   }
 
+  override def getListsByNickname(
+      nickname: String): Future[List[ItemListResponseDTO]] = {
+    log.info(s"Getting lists of user $nickname")
+    listRepository.getItemListsByNickname(nickname)
+  }
+
+  override def addItem(req: ItemRequestDTO): Future[Item] = {
+    log.info(s"Added item to list ${req.itemListId}")
+    val item = convertRequestToModel(req)
+    listRepository.insertItem(item)
+  }
+
+  private def convertRequestToModel(req: ItemRequestDTO): Item =
+    Item(
+      id = UUID.randomUUID(),
+      title = req.title,
+      content = req.content,
+      itemListId = req.itemListId,
+      createDate = Some(LocalDateTime.now()),
+      updateDate = Some(LocalDateTime.now())
+    )
+
   private def createEmptyList(listName: String, nickname: String) =
     ItemList(id = UUID.randomUUID(),
              name = listName,
@@ -32,11 +54,4 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
              createDate = Some(LocalDateTime.now()),
              updateDate = Some(LocalDateTime.now()))
 
-  override def getListsByNickname(
-      nickname: String): Future[List[ItemListResponseDTO]] = {
-    log.info(s"Getting lists of user $nickname")
-    listRepository.getItemListsByNickname(nickname)
-  }
-
-  override def addItem(req: ItemRequestDTO): Future[Item] = ???
 }
