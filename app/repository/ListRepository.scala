@@ -40,8 +40,9 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
     ctx.run(q).map(_ => item)
   }
 
-  def toReponseDTO(tup: (ItemList, List[Item])): ItemListResponseDTO = {
-    val (itemList, items) = tup
+  def toReponseDTO(tup: (ItemList, List[Option[Item]])): ItemListResponseDTO = {
+    val (itemList, itemsOption) = tup
+    val items = itemsOption.filter(_.isDefined).map(_.get)
     ItemListResponseDTO(
       id = itemList.id,
       name = itemList.name,
@@ -62,8 +63,7 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
       .map(
         list =>
           list
-            .filter(tup => tup._2.isDefined)
-            .groupMap(_._1)(_._2.get)
+            .groupMap(_._1)(_._2)
             .map(tup => toReponseDTO(tup))
             .toList)
   }
