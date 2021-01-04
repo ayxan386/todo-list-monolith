@@ -1,6 +1,8 @@
 package controllers.lists
 
 import controllers.GenericResponse
+import dtos.itemlist.ItemRequestDTO
+import errors.dto.badrequest.BodyParsingException
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, Handler}
 import services.ListService
@@ -32,5 +34,14 @@ class ListController @Inject()(
       .map(li => GenericResponse("success", li))
       .map(Json.toJson(_))
       .map(Ok(_))
+  }
+
+  def addItem: Handler = Action.async { implicit request =>
+    request.body.asJson match {
+      case Some(json) =>
+        json.asOpt[ItemRequestDTO]
+          .map(req => listService.addItem(req))
+      case None       => throw BodyParsingException()
+    }
   }
 }

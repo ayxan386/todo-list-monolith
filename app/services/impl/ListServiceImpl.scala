@@ -1,7 +1,7 @@
 package services.impl
 
-import dtos.itemlist.ItemListResponseDTO
-import models.ItemList
+import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO}
+import models.{Item, ItemList}
 import play.api.Logger
 import repository.ListRepository
 import services.ListService
@@ -37,4 +37,6 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
     log.info(s"Getting lists of user $nickname")
     listRepository.getItemListsByNickname(nickname)
   }
+
+  override def addItem(req: ItemRequestDTO): Future[Item] = ???
 }
