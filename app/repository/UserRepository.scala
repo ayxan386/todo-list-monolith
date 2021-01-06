@@ -1,6 +1,6 @@
 package repository
 
-import io.getquill.{PostgresAsyncContext, SnakeCase}
+import io.getquill.{PostgresJdbcContext, SnakeCase}
 import models.User
 
 import javax.inject.{Inject, Singleton}
@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class UserRepository @Inject()(implicit ex: ExecutionContext) {
 
-  lazy val ctx = new PostgresAsyncContext[SnakeCase](SnakeCase, "ctx")
+  lazy val ctx = new PostgresJdbcContext[SnakeCase](SnakeCase, "ctx")
 
   import ctx._
 
@@ -17,16 +17,18 @@ class UserRepository @Inject()(implicit ex: ExecutionContext) {
 
   def findByNickname(nickname: String): Future[Option[User]] = {
     val q = quote(baseModel.filter(_.nickname == lift(nickname)))
-    ctx.run(q).map(ru => ru.headOption)
+    Future.successful(ctx.run(q).headOption)
   }
 
   def insertUser(user: User): Future[User] = {
     val q = quote(baseModel.insert(lift(user)))
-    ctx.run(q).map(_ => user)
+    Future
+      .apply(ctx.run(q))
+      .map(_ => user)
   }
 
   def deleteByNickname(nickname: String): Future[String] = {
     val q = quote(baseModel.filter(_.nickname == lift(nickname)).delete)
-    ctx.run(q).map(_ => "success")
+    Future(ctx.run(q)).map(_ => "success")
   }
 }
