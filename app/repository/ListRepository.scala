@@ -5,6 +5,7 @@ import io.getquill.{PostgresAsyncContext, SnakeCase}
 import models.{Item, ItemList}
 
 import javax.inject.{Inject, Singleton}
+import scala.collection.compat.toTraversableLikeExtensionMethods
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
