@@ -1,7 +1,7 @@
 package repository
 
 import dtos.itemlist.ItemListResponseDTO
-import io.getquill.{PostgresAsyncContext, SnakeCase}
+import io.getquill.{PostgresJdbcContext, SnakeCase}
 import models.{Item, ItemList}
 
 import javax.inject.{Inject, Singleton}
@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ListRepository @Inject()(implicit ex: ExecutionContext) {
 
-  lazy val ctx = new PostgresAsyncContext[SnakeCase](SnakeCase, "ctx")
+  lazy val ctx = new PostgresJdbcContext[SnakeCase](SnakeCase, "ctx")
 
   import ctx._
 
@@ -30,14 +30,14 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
     val q = quote {
       baseListModel.insert(lift(list))
     }
-    ctx.run(q).map(_ => list)
+    Future(ctx.run(q)).map(_ => list)
   }
 
   def insertItem(item: Item): Future[Item] = {
     val q = quote {
       baseItemModel.insert(lift(item))
     }
-    ctx.run(q).map(_ => item)
+    Future(ctx.run(q)).map(_ => item)
   }
 
   def toReponseDTO(tup: (ItemList, List[Option[Item]])): ItemListResponseDTO = {
@@ -58,13 +58,11 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
     val q = quote {
       listJoinedItems.filter(_._1.username == lift(nickname))
     }
-    ctx
-      .run(q)
-      .map(
-        list =>
-          list
-            .groupMap(_._1)(_._2)
-            .map(tup => toReponseDTO(tup))
-            .toList)
+    Future(
+      ctx
+        .run(q)
+        .groupMap(_._1)(_._2)
+        .map(tup => toReponseDTO(tup))
+        .toList)
   }
 }
