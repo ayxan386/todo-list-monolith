@@ -15,6 +15,7 @@ class TokenFilter @Inject()(jwtUtils: JwtUtils)(implicit val mat: Materializer,
     extends Filter {
 
   private val ignoredPaths = List("login", "register")
+  private val ignoredMethods = List("OPTIONS")
   val HEADER_NAME = "Authorization"
   val PREFIX = "Bearer "
   val log = Logger("filters")
@@ -23,9 +24,12 @@ class TokenFilter @Inject()(jwtUtils: JwtUtils)(implicit val mat: Materializer,
     Some(rh)
       .filter(r => !ignoredPaths.exists(path => r.path.contains(path)))
 
+  def checkRequestMethod(rh: RequestHeader): Boolean =
+    !ignoredMethods.exists(method => method.equalsIgnoreCase(rh.method))
+
   override def apply(f: RequestHeader => Future[Result])(
       rh: RequestHeader): Future[Result] = {
-    if (checkPath(rh).isDefined) {
+    if (checkPath(rh).isDefined && checkRequestMethod(rh)) {
       rh.headers
         .get(HEADER_NAME)
         .orElse(throw MissingHeadersError())
