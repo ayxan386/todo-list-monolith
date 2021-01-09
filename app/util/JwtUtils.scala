@@ -1,17 +1,19 @@
 package util
 
+import com.typesafe.config.ConfigFactory
 import errors.dto.unauthorizthed.InvalidTokenSignatureError
 import io.jsonwebtoken.{JwtException, Jwts, SignatureAlgorithm}
+import play.api.Configuration
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class JwtUtils {
 
-  val secret = "hello_world"
+  val secret: String = ConfigFactory.load().getString("tokenSecret")
 
   def buildToken(nickname: String): String =
     Jwts

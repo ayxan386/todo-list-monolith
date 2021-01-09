@@ -19,7 +19,7 @@ class ErrorHandler extends HttpErrorHandler {
   override def onClientError(request: RequestHeader,
                              statusCode: Int,
                              message: String): Future[Result] = {
-    log.error(s"Client error with statusCode $statusCode and message $message")
+    log.error(s"Status code <$statusCode>; $message")
     Future.successful(buildResult(statusCode, message))
   }
 
@@ -30,7 +30,7 @@ class ErrorHandler extends HttpErrorHandler {
         buildResult(statusCode = httpError.status, httpError.message)
       case _ => buildResult(500, ex.getMessage)
     }
-    log.error(s"Serverside error message ${ex.getMessage}")
+    log.error(s"${ex.getMessage}")
     Future.successful(result)
   }
 
