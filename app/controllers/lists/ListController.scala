@@ -16,7 +16,6 @@ class ListController @Inject()(
     listService: ListService)(implicit ex: ExecutionContext)
     extends AbstractController(cc) {
 
-
   def createList(listName: String) = Action.async { implicit request =>
     request.attrs
       .get(TypedKeys.tokenType)
@@ -51,12 +50,13 @@ class ListController @Inject()(
     }
   }
 
-  def deleteItem(itemId: String): Handler = Action.async{implicit request =>
+  def deleteItem(itemId: String): Handler = Action.async { implicit request =>
     request.attrs
       .get(TypedKeys.tokenType)
-      .map(nickname => listService.deleteItem(nickname = nickname, itemId = itemId))
+      .map(nickname =>
+        listService.deleteItem(nickname = nickname, itemId = itemId))
       .get
-      .map(mes => GenericResponse(mes, "success"))
+      .map(mes => GenericResponse(data = mes, message = "success"))
       .map(Json.toJson(_))
       .map(Ok(_))
   }

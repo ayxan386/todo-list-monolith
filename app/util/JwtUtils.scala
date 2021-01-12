@@ -3,12 +3,11 @@ package util
 import com.typesafe.config.ConfigFactory
 import errors.dto.unauthorizthed.InvalidTokenSignatureError
 import io.jsonwebtoken.{JwtException, Jwts, SignatureAlgorithm}
-import play.api.Configuration
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 
 @Singleton
 class JwtUtils {
