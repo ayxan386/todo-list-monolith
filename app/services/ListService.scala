@@ -18,4 +18,6 @@ trait ListService {
 
   def deleteItem(nickname: String, itemId: String): Future[String]
 
+  def deleteList(nickname: String, listId: String): Future[String]
+
 }

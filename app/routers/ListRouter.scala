@@ -15,5 +15,6 @@ class ListRouter @Inject()(listController: ListController)
     case GET(p"/mine")        => listController.getMyLists
     case PUT(p"/addItem")     => listController.addItem
     case DELETE(p"/item"?q"id=$itemId") => listController.deleteItem(itemId)
+    case DELETE(p"/list"?q"id=$listId") => listController.deleteList(listId)
   }
 }
