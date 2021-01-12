@@ -55,5 +55,9 @@ class ListController @Inject()(
     request.attrs
       .get(TypedKeys.tokenType)
       .map(nickname => listService.deleteItem(nickname = nickname, itemId = itemId))
+      .get
+      .map(mes => GenericResponse(mes, "success"))
+      .map(Json.toJson(_))
+      .map(Ok(_))
   }
 }
