@@ -65,4 +65,17 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
         .map(tup => toReponseDTO(tup))
         .toList)
   }
+
+  def checkUserAndDeleteItem(nickname: String,
+                             itemId: String): Future[String] = {
+    val q = quote {
+      listJoinedItems
+        .filter(tup => tup._1.username == lift(nickname))
+        .filter(tup => tup._2.exists(item => item.id.toString == lift(itemId)))
+    }
+    Future(
+      ctx
+        .run(q)
+    ).map(_ => "deleted")
+  }
 }
