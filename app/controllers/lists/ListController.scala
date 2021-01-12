@@ -16,6 +16,7 @@ class ListController @Inject()(
     listService: ListService)(implicit ex: ExecutionContext)
     extends AbstractController(cc) {
 
+
   def createList(listName: String) = Action.async { implicit request =>
     request.attrs
       .get(TypedKeys.tokenType)
@@ -48,5 +49,11 @@ class ListController @Inject()(
           .map(Ok(_))
       case None => throw BodyParsingException()
     }
+  }
+
+  def deleteItem(itemId: String): Handler = Action.async{implicit request =>
+    request.attrs
+      .get(TypedKeys.tokenType)
+      .map(nickname => listService.deleteItem(nickname = nickname, itemId = itemId))
   }
 }
