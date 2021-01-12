@@ -4,6 +4,7 @@ import dtos.itemlist.ItemListResponseDTO
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import models.{Item, ItemList}
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -64,5 +65,19 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
         .groupMap(_._1)(_._2)
         .map(tup => toReponseDTO(tup))
         .toList)
+  }
+
+  def checkUserAndDeleteItem(nickname: String,
+                             itemId: String): Future[String] = {
+    val q = quote {
+      listJoinedItems
+        .filter(tup => tup._1.username == lift(nickname))
+        .filter(tup =>
+          tup._2.exists(item => item.id == lift(UUID.fromString(itemId))))
+    }
+    Future(
+      ctx
+        .run(q)
+    ).map(_ => "deleted")
   }
 }

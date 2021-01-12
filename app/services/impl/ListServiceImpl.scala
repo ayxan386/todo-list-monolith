@@ -37,6 +37,11 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
     listRepository.insertItem(item)
   }
 
+  override def deleteItem(nickname: String, itemId: String): Future[String] = {
+    log.info(s"Deleting item ${itemId} by ${nickname}")
+    listRepository.checkUserAndDeleteItem(nickname, itemId)
+  }
+
   private def convertRequestToModel(req: ItemRequestDTO): Item =
     Item(
       id = UUID.randomUUID(),
