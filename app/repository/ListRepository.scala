@@ -4,6 +4,7 @@ import dtos.itemlist.ItemListResponseDTO
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import models.{Item, ItemList}
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,7 +72,8 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
     val q = quote {
       listJoinedItems
         .filter(tup => tup._1.username == lift(nickname))
-        .filter(tup => tup._2.exists(item => item.id.toString == lift(itemId)))
+        .filter(tup =>
+          tup._2.exists(item => item.id == lift(UUID.fromString(itemId))))
     }
     Future(
       ctx
