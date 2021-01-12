@@ -1,6 +1,7 @@
 package repository
 
 import dtos.itemlist.ItemListResponseDTO
+import errors.dto.notfound.ItemBelongingDoesNotExist
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import models.{Item, ItemList}
 
@@ -69,16 +70,29 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
 
   def checkUserAndDeleteItem(nickname: String,
                              itemId: String): Future[String] = {
-    val q = quote {
+    val checkForUsernameQuery = quote {
       listJoinedItems
         .filter(tup => tup._1.username == lift(nickname))
         .filter(tup =>
           tup._2.exists(item => item.id == lift(UUID.fromString(itemId))))
+        .map(tup => tup._2.map(_.id))
     }
-    Future(
-      ctx
-        .run(q)
-    ).map(_ => "deleted")
+
+    val deleteItems = quote { id: UUID =>
+      baseItemModel
+        .filter(_.id == id)
+        .delete
+    }
+
+    Future(ctx.run(checkForUsernameQuery).headOption)
+      .map(op => op.flatten)
+      .filter(_.isDefined)
+      .map(_.get)
+      .recoverWith({
+        case _ => throw ItemBelongingDoesNotExist(nickname = nickname, itemId)
+      })
+      .map(id => ctx.run(deleteItems(lift(id))))
+      .map(_ => "deleted")
   }
 
   def checkUserAndDeleteList(nickname: String, listId: UUID): Future[String] = {
