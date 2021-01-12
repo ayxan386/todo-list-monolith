@@ -60,4 +60,15 @@ class ListController @Inject()(
       .map(Json.toJson(_))
       .map(Ok(_))
   }
+
+  def deleteList(listId: String): Handler = Action.async { implicit request =>
+    request.attrs
+      .get(TypedKeys.tokenType)
+      .map(nickname =>
+        listService.deleteList(nickname = nickname, listId = listId))
+      .get
+      .map(mes => GenericResponse(data = mes, message = "success"))
+      .map(Json.toJson(_))
+      .map(Ok(_))
+  }
 }

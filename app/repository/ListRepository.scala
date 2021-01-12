@@ -80,4 +80,24 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
         .run(q)
     ).map(_ => "deleted")
   }
+
+  def checkUserAndDeleteList(nickname: String, listId: UUID): Future[String] = {
+    val deleteListQuery = quote {
+      baseListModel
+        .filter(_.id == lift(listId))
+        .filter(_.username == lift(nickname))
+        .delete
+    }
+
+    val deleteAllListsItems = quote {
+      baseItemModel
+        .filter(_.itemListId == lift(listId))
+        .delete
+    }
+    Future(
+      ctx
+        .run(deleteAllListsItems))
+      .map(_ => ctx.run(deleteListQuery))
+      .map(_ => "deleted")
+  }
 }
