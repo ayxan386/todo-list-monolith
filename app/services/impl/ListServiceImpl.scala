@@ -3,7 +3,6 @@ package services.impl
 import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO, UpdateItemRequest}
 import errors.dto.notfound.ItemNotFoundError
 import models.{Item, ItemList}
-import org.apache.commons.beanutils.BeanUtils
 import play.api.Logger
 import repository.ListRepository
 import services.ListService
@@ -67,7 +66,7 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
       .flatMap(
         item =>
           request.status
-            .map(status => item.copy())
+            .map(status => item.copy(status = status))
             .orElse(Some(item)))
       .get
 
@@ -78,7 +77,8 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
       content = req.content,
       itemListId = req.itemListId,
       createDate = Some(LocalDateTime.now()),
-      updateDate = Some(LocalDateTime.now())
+      updateDate = Some(LocalDateTime.now()),
+      status = "NEW"
     )
 
   private def createEmptyList(listName: String, nickname: String) =
