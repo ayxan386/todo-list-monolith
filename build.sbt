@@ -16,8 +16,6 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "42.2.16",
   "org.mindrot" % "jbcrypt" % "0.3m"
 )
-libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.4"
-
 
 libraryDependencies += "io.getquill" %% "quill-jdbc" % "3.6.0"
 
