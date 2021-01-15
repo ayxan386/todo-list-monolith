@@ -1,6 +1,7 @@
 package services.impl
 
 import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO, UpdateItemRequest}
+import errors.dto.notfound.ItemNotFoundError
 import models.{Item, ItemList}
 import org.apache.commons.beanutils.BeanUtils
 import play.api.Logger
