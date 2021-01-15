@@ -1,7 +1,8 @@
 package services.impl
 
-import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO}
+import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO, UpdateItemRequest}
 import models.{Item, ItemList}
+import org.apache.commons.beanutils.BeanUtils
 import play.api.Logger
 import repository.ListRepository
 import services.ListService
@@ -44,8 +45,30 @@ class ListServiceImpl @Inject()(listRepository: ListRepository)(
 
   override def deleteList(nickname: String, listId: String): Future[String] = {
     log.info(s"Deleting list ${listId} by $nickname")
-    listRepository.checkUserAndDeleteList(nickname = nickname, listId = UUID.fromString(listId))
+    listRepository.checkUserAndDeleteList(nickname = nickname,
+                                          listId = UUID.fromString(listId))
   }
+
+  override def updateItem(req: UpdateItemRequest): Future[Item] = {
+    log.info(s"Update item with id<${req.id}>")
+    listRepository
+      .getItemById(req.id)
+      .map(op => op.getOrElse(throw ItemNotFoundError(req.id.toString)))
+      .map(item => copyExistingProperties(item, req))
+      .map(listRepository.updateItem)
+      .flatten
+  }
+
+  private def copyExistingProperties(item: Item, request: UpdateItemRequest) =
+    request.content
+      .map(content => item.copy(content = Some(content)))
+      .orElse(Some(item))
+      .flatMap(
+        item =>
+          request.status
+            .map(status => item.copy())
+            .orElse(Some(item)))
+      .get
 
   private def convertRequestToModel(req: ItemRequestDTO): Item =
     Item(

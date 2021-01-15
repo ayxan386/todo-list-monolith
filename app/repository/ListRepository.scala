@@ -5,6 +5,7 @@ import errors.dto.notfound.ItemBelongingDoesNotExist
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import models.{Item, ItemList}
 
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -113,5 +114,26 @@ class ListRepository @Inject()(implicit ex: ExecutionContext) {
         .run(deleteAllListsItems))
       .map(_ => ctx.run(deleteListQuery))
       .map(_ => "deleted")
+  }
+
+  def getItemById(id: UUID): Future[Option[Item]] = {
+    val q = quote {
+      baseItemModel
+        .filter(_.id == lift(id))
+    }
+    Future(ctx.run(q).headOption)
+  }
+
+  def updateItem(item: Item): Future[Item] = {
+    val itemToUpdate = item.copy(updateDate = Some(LocalDateTime.now()))
+    val q = quote {
+      baseItemModel
+        .filter(_.id == lift(itemToUpdate.id))
+        .update(lift(itemToUpdate))
+    }
+    Future(
+      ctx
+        .run(q))
+      .map(_ => itemToUpdate)
   }
 }
