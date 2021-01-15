@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.ImplementedBy
-import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO}
+import dtos.itemlist.{ItemListResponseDTO, ItemRequestDTO, UpdateItemRequest}
 import models.{Item, ItemList}
 import services.impl.ListServiceImpl
 
@@ -9,6 +9,7 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[ListServiceImpl])
 trait ListService {
+  def updateItem(req: UpdateItemRequest): Future[Item]
 
   def addItem(req: ItemRequestDTO): Future[Item]
 

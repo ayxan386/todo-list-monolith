@@ -1,8 +1,9 @@
 package controllers.lists
 
 import controllers.GenericResponse
-import dtos.itemlist.ItemRequestDTO
+import dtos.itemlist.{ItemRequestDTO, UpdateItemRequest}
 import errors.dto.badrequest.BodyParsingException
+import org.apache.commons.beanutils.BeanUtils
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, Handler}
 import services.ListService
@@ -70,5 +71,19 @@ class ListController @Inject()(
       .map(mes => GenericResponse(data = mes, message = "success"))
       .map(Json.toJson(_))
       .map(Ok(_))
+  }
+
+  def updateItem() = Action.async { implicit request =>
+    request.body.asJson match {
+      case Some(jsonBody) =>
+        jsonBody
+          .asOpt[UpdateItemRequest]
+          .map(req => listService.updateItem(req))
+          .get
+          .map(item => GenericResponse(data = item, message = "success"))
+          .map(Json.toJson(_))
+          .map(Ok(_))
+      case None => throw BodyParsingException()
+    }
   }
 }
