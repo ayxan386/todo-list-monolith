@@ -3,7 +3,6 @@ package controllers.lists
 import controllers.GenericResponse
 import dtos.itemlist.{ItemRequestDTO, UpdateItemRequest}
 import errors.dto.badrequest.BodyParsingException
-import org.apache.commons.beanutils.BeanUtils
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, Handler}
 import services.ListService

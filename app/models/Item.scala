@@ -8,6 +8,7 @@ import java.util.UUID
 case class Item(id: UUID,
                 title: String,
                 content: Option[String],
+                status: String,
                 itemListId: UUID,
                 createDate: Option[LocalDateTime],
                 updateDate: Option[LocalDateTime])
